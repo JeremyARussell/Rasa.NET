@@ -82,6 +82,7 @@ namespace Rasa.Managers
             RegisterCommand(".gm", EnterGmModCommand);
             RegisterCommand(".forcestate", ForceStateCommand);
             RegisterCommand(".help", HelpGmCommand);
+            RegisterCommand(".mission", MissionCommand);
             RegisterCommand(".npcinfo", NpcInfoCommand);
             RegisterCommand(".reloadcreatures", ReloadCreaturesCommand);
             RegisterCommand(".rqs", RqsWindowCommand);
@@ -311,6 +312,33 @@ namespace Rasa.Managers
                 CommunicatorManager.Instance.SystemMessage(_client, $"{command.Key}");
 
             return;
+        }
+
+        private void MissionCommand(string[] parts)
+        {
+            if (parts.Length == 1)
+            {
+                CommunicatorManager.Instance.SystemMessage(_client, "Usage: .mission <command> <parameters...>");
+                return;
+            }
+
+            if (parts[1] == "add")
+            {
+                if (parts.Length < 3)
+                {
+                    CommunicatorManager.Instance.SystemMessage(_client, "Usage: .mission add <mission id>");
+                    return;
+                }
+
+                uint missionId;
+                if (!uint.TryParse(parts[2], out missionId))
+                {
+                    return;
+                }
+
+                _client.CallMethod(_client.MapClient.Player.Actor.EntityId, new MissionGainedPacket(missionId, new MissionInfo()));
+                Console.WriteLine("Mission command ran");
+            }
         }
 
         private void NpcInfoCommand(string[] parts)
